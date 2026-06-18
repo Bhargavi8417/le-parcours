@@ -1,6 +1,23 @@
-# France Student Relocation Hub
+# Le Parcours
+
+🔗 **Live demo:** https://le-parcours-chi.vercel.app
 
 A full-stack web application for an independent Paris-based relocation consultant helping international students move to France. Students manage their relocation journey; the admin (consultant) manages services, bookings, accommodations, and knowledge base articles.
+
+## Why I built it
+
+I noticed someone running an independent service helping students relocate to France struggling to manage client information, scattered documents, and accommodation details manually across spreadsheets and messages. I built Le Parcours as a single platform to organise the entire journey — giving students a clear, structured dashboard from application to settlement, and giving the consultant one place to manage everything.
+
+## Try the live demo
+
+| Role | Email | Password |
+|---|---|---|
+| Student | demo.student@leparcours.com | demo@123 |
+| Admin | demo.admin@leparcours.com | demo@123 |
+
+The admin account gives full access to the admin panel (bookings, students, services, articles, accommodations). The student account shows the full student journey dashboard.
+
+---
 
 ## Features
 
@@ -26,7 +43,7 @@ A full-stack web application for an independent Paris-based relocation consultan
 |---|---|
 | Framework | Next.js 16 (App Router, TypeScript) |
 | Styling | Tailwind CSS v4 |
-| Auth | Supabase Auth (email/password + Google OAuth) |
+| Auth | Supabase Auth (email/password) |
 | Database | Supabase (Postgres, Row Level Security) |
 | Storage | Supabase Storage |
 | i18n | next-intl v4 (cookie-based locale) |
@@ -36,7 +53,6 @@ A full-stack web application for an independent Paris-based relocation consultan
 
 - Node.js 18+
 - A [Supabase](https://supabase.com) project (free tier works)
-- (Optional) A Google OAuth app for Google sign-in
 
 ---
 
@@ -88,16 +104,7 @@ For the `documents` bucket, restrict to the owning student:
 - **SELECT**: `auth.uid()::text = (storage.foldername(name))[1]`
 - **INSERT**: same
 
-### 5. Configure Google OAuth (optional)
-
-In Supabase Dashboard → **Authentication → Providers → Google**:
-1. Enable Google provider
-2. Add your Google OAuth client ID and secret
-3. Copy the callback URL shown and add it to your Google Cloud Console as an authorised redirect URI
-
-In `Google Cloud Console → APIs & Services → Credentials`, set the authorised JavaScript origin to `http://localhost:3000` for local dev.
-
-### 6. Run the development server
+### 5. Run the development server
 
 ```bash
 npm run dev
@@ -105,7 +112,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### 7. Create your admin account
+### 6. Create your admin account
 
 1. Sign up on the app with the email you want to use as admin.
 2. In Supabase Dashboard → **SQL Editor**, run:
@@ -116,7 +123,7 @@ SET role = 'admin'
 WHERE email = 'your@email.com';
 ```
 
-3. Sign out and sign back in — you can now access `/admin/dashboard`.
+3. Sign out and sign back in — you will land directly on `/admin/dashboard`.
 
 ---
 
@@ -143,13 +150,12 @@ webapp/
 │   │   ├── services/
 │   │   ├── articles/
 │   │   └── accommodations/
-│   ├── api/auth/        # Supabase OAuth callback
 │   └── page.tsx         # Public landing page
 ├── components/
 │   ├── admin/           # Admin-only components
 │   ├── landing/         # Landing page components
 │   ├── student/         # Student portal components
-│   └── ui/              # Shared UI primitives
+│   └── ui/             # Shared UI primitives
 ├── lib/
 │   ├── actions/         # Server Actions (student + admin mutations)
 │   ├── supabase/        # Supabase client helpers + middleware
@@ -159,7 +165,7 @@ webapp/
 ├── types/               # TypeScript types
 ├── supabase/
 │   └── schema.sql       # Full database schema
-└── middleware.ts        # Auth session refresh + route protection
+└── proxy.ts             # Auth session refresh + route protection
 ```
 
 ---
@@ -197,13 +203,8 @@ Set all three to **Production**, **Preview**, and **Development** environments.
 
 ### 4. Configure Supabase for your production URL
 
-In Supabase → **Authentication → URL Configuration**:
+In Supabase → **Authentication → URL Configuration**, set:
 - **Site URL**: `https://your-vercel-domain.vercel.app`
-- **Redirect URLs**: add `https://your-vercel-domain.vercel.app/api/auth/callback`
-
-If using Google OAuth:
-- Add the production URL to authorised JavaScript origins in Google Cloud Console
-- Add `https://your-vercel-domain.vercel.app/api/auth/callback` to authorised redirect URIs
 
 ### 5. Deploy
 
@@ -214,6 +215,7 @@ Click **Deploy** on Vercel. Your app is live. Subsequent pushes to `main` auto-d
 ## Key decisions
 
 - **Cookie-based locale** — next-intl is configured without URL segments (`/en/...`), so switching language doesn't change the URL
+- **Role-based routing** — admins are redirected to `/admin/dashboard` on login and blocked from all student routes at the layout level; students never see any admin UI
 - **Admin promotion via SQL** — there is no self-serve admin signup; the consultant manually promotes accounts in the Supabase dashboard
 - **Service role key on server only** — all admin mutations use `createAdminClient()` which uses the service role key; it is never exposed to the browser
 - **Accommodation carousels** — client component with CSS `translateX` sliding; no external carousel library
