@@ -28,6 +28,8 @@ export default async function StudentLayout({ children }: { children: React.Reac
     profile = created
   }
 
+  if (profile?.role === 'admin') redirect('/admin/dashboard')
+
   return (
     <div className="min-h-screen bg-slate-50">
       <StudentNav profile={profile} />
