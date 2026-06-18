@@ -32,6 +32,9 @@ export default async function LoginPage({
           )}
 
           <form action={signIn} className="space-y-4">
+            {params.redirect && (
+              <input type="hidden" name="redirectTo" value={params.redirect} />
+            )}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">{t('email')}</label>
               <input id="email" name="email" type="email" required autoComplete="email"

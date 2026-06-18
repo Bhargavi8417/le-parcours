@@ -37,11 +37,14 @@ export async function signIn(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`)
+    const redirectTo = formData.get('redirectTo') as string | null
+    const base = `/login?error=${encodeURIComponent(error.message)}`
+    redirect(redirectTo ? `${base}&redirect=${encodeURIComponent(redirectTo)}` : base)
   }
 
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  const redirectTo = formData.get('redirectTo') as string | null
+  redirect(redirectTo?.startsWith('/') ? redirectTo : '/dashboard')
 }
 
 

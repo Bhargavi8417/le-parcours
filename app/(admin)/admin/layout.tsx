@@ -1,31 +1,35 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import AdminNav from '@/components/admin/AdminNav'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
-  console.log('[AdminLayout] user.id:', user?.id ?? 'NONE', '| userError:', userError?.message ?? 'none')
-  if (!user) {
-    console.log('[AdminLayout] no user → /login')
-    redirect('/login')
-  }
+  const admin = await createAdminClient()
 
-  const { data: profile, error: profileError } = await supabase
+  let { data: profile } = await admin
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
-  console.log('[AdminLayout] role:', profile?.role ?? 'null', '| profileError:', profileError?.message ?? 'none')
-
-  if (profile?.role !== 'admin') {
-    console.log('[AdminLayout] REDIRECT → /dashboard (role was:', profile?.role, ')')
-    redirect('/dashboard')
+  if (!profile) {
+    const { data: created } = await admin
+      .from('profiles')
+      .insert({
+        id: user.id,
+        email: user.email ?? '',
+        full_name: user.user_metadata?.full_name ?? '',
+        role: 'student',
+      })
+      .select('role')
+      .single()
+    profile = created
   }
 
-  console.log('[AdminLayout] ✓ rendering admin layout')
+  if (profile?.role !== 'admin') redirect('/dashboard')
 
   return (
     <div className="min-h-screen bg-slate-50">
