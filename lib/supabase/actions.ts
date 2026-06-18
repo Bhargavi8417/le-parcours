@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient()
@@ -43,8 +43,24 @@ export async function signIn(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
+
+  // Explicit redirect (e.g. coming from /admin/dashboard while logged out)
   const redirectTo = formData.get('redirectTo') as string | null
-  redirect(redirectTo?.startsWith('/') ? redirectTo : '/dashboard')
+  if (redirectTo?.startsWith('/')) redirect(redirectTo)
+
+  // Role-based default destination
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const admin = await createAdminClient()
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle()
+    if (profile?.role === 'admin') redirect('/admin/dashboard')
+  }
+
+  redirect('/dashboard')
 }
 
 

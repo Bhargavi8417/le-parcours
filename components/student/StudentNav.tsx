@@ -92,6 +92,18 @@ export default function StudentNav({ profile }: StudentNavProps) {
           {navItems.map((item) => <NavLink key={item.href} item={item} />)}
         </nav>
 
+        {profile?.role === 'admin' && (
+          <div className="px-3 pb-2 border-t border-slate-200 pt-3">
+            <Link
+              href="/admin/dashboard"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 transition-colors"
+            >
+              <span className="text-base w-5 text-center">⚙</span>
+              Admin Dashboard
+            </Link>
+          </div>
+        )}
+
         <div className="border-t border-slate-200 px-3 py-4">
           <UserFooter />
         </div>
@@ -135,6 +147,19 @@ export default function StudentNav({ profile }: StudentNavProps) {
         <nav className="px-3 py-4 space-y-0.5">
           {navItems.map((item) => <NavLink key={item.href} item={item} />)}
         </nav>
+        {profile?.role === 'admin' && (
+          <div className="px-3 pb-2 border-t border-slate-200 pt-3">
+            <Link
+              href="/admin/dashboard"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 transition-colors"
+            >
+              <span className="text-base w-5 text-center">⚙</span>
+              Admin Dashboard
+            </Link>
+          </div>
+        )}
+
         <div className="border-t border-slate-200 px-3 py-4">
           <UserFooter />
         </div>
