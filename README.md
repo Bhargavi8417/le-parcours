@@ -219,3 +219,7 @@ Click **Deploy** on Vercel. Your app is live. Subsequent pushes to `main` auto-d
 - **Admin promotion via SQL** — there is no self-serve admin signup; the consultant manually promotes accounts in the Supabase dashboard
 - **Service role key on server only** — all admin mutations use `createAdminClient()` which uses the service role key; it is never exposed to the browser
 - **Accommodation carousels** — client component with CSS `translateX` sliding; no external carousel library
+
+---
+
+Built by Bhargavi Akula as a full-stack portfolio project.
